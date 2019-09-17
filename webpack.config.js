@@ -2,7 +2,7 @@ var path = require("path");
 var HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
-  entry: "./src/app/index",
+  entry: "./src/index",
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: "bundle.js",
@@ -19,8 +19,8 @@ module.exports = {
         loader: "babel-loader"
       },
       {
-        test: /(\.css)$/,
-        use: ["style-loader", "css-loader"]
+        test: /(\.(s*)css)$/,
+        use: ["style-loader", "css-loader", "sass-loader"]
       }
     ]
   },
