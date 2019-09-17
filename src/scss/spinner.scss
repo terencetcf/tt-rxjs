@@ -1,0 +1,52 @@
+$loadingIconColor: rgb(250, 117, 0);
+
+@mixin getDot($index, $delay, $top, $left) {
+  &:nth-child(#{$index}) {
+    animation-delay: $delay;
+    &:after {
+      top: $top;
+      left: $left;
+    }
+  }
+}
+
+.lds-roller {
+  display: inline-block;
+  position: relative;
+  width: 64px;
+  height: 64px;
+
+  div {
+    animation: lds-roller 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+    transform-origin: 32px 32px;
+
+    &:after {
+      content: " ";
+      display: block;
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: $loadingIconColor;
+      margin: -3px 0 0 -3px;
+    }
+
+    @include getDot(1, -0.036s, 50px, 50px);
+    @include getDot(2, -0.072s, 54px, 45px);
+    @include getDot(3, -0.108s, 57px, 39px);
+    @include getDot(4, -0.144s, 58px, 32px);
+    @include getDot(5, -0.18s, 57px, 25px);
+    @include getDot(6, -0.216s, 54px, 19px);
+    @include getDot(7, -0.252s, 50px, 14px);
+    @include getDot(8, -0.288s, 45px, 10px);
+  }
+}
+
+@keyframes lds-roller {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

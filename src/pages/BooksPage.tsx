@@ -1,17 +1,21 @@
-import React, { useEffect, useState, FunctionComponent } from "react";
-import { pluck } from "rxjs/operators";
+import React, { useEffect, useState } from "react";
+import { pluck, delay } from "rxjs/operators";
 import { ajax } from "rxjs/ajax";
 import Book from "../interfaces/Book";
 import BookList from "../components/BookList";
 import { toast } from "react-toastify";
+import LoadingSpinner from "../components/LoadingSpinner";
 
-const BooksPage: FunctionComponent = () => {
+const BooksPage = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [searchKeywords, setSearchKeyWords] = useState("");
 
   useEffect(() => {
     const subscription = ajax("http://localhost:7777/books")
-      .pipe(pluck("response"))
+      .pipe(
+        pluck("response"),
+        delay(500)
+      )
       .subscribe(
         response => {
           setBooks([...response]);
@@ -60,13 +64,19 @@ const BooksPage: FunctionComponent = () => {
   return (
     <>
       <h1>Books</h1>
-      <button onClick={handleClick}>Add</button>
-      <input
-        value={searchKeywords}
-        onChange={handleSearchKeywordsChanged}
-        type="text"
-      />
-      <BookList books={getFilteredBooks()} />
+      {books.length < 1 ? (
+        <LoadingSpinner />
+      ) : (
+        <>
+          <button onClick={handleClick}>Add</button>
+          <input
+            value={searchKeywords}
+            onChange={handleSearchKeywordsChanged}
+            type="text"
+          />
+          <BookList books={getFilteredBooks()} />
+        </>
+      )}
     </>
   );
 };
