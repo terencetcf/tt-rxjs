@@ -34,7 +34,15 @@ const BooksPage: FunctionComponent = () => {
   }, []);
 
   const handleClick = () => {
-    setBooks([...books, { bookID: 99, title: "unknown99" } as Book]);
+    const latestId = Math.max(...books.map(book => book.bookID));
+    const newBook: Book = {
+      bookID: latestId + 1,
+      title: "Book " + (latestId + 1).toString(),
+      author: "Terence",
+      publicationYear: 2019
+    };
+
+    setBooks([...books, newBook]);
   };
 
   const handleSearchKeywordsChanged = (
