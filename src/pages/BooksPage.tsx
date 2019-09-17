@@ -1,52 +1,45 @@
 import React, { useEffect, useState } from "react";
-import { pluck, delay } from "rxjs/operators";
-import { ajax } from "rxjs/ajax";
+import { connect } from "react-redux";
 import Book from "../interfaces/Book";
 import BookList from "../components/BookList";
-import { toast } from "react-toastify";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { fetchBooks, addBook } from "../store/actions/bookActions";
+import AppStoreState from "../interfaces/AppStoreState";
 
-const BooksPage = () => {
-  const [books, setBooks] = useState<Book[]>([]);
+interface IProps extends AppStoreState {
+  fetchBooks: () => any;
+  addBook: () => any;
+}
+
+const BooksPage: React.FunctionComponent<IProps> = ({
+  books,
+  isLoading,
+  error,
+  fetchBooks,
+  addBook
+}) => {
   const [searchKeywords, setSearchKeyWords] = useState("");
 
   useEffect(() => {
-    const subscription = ajax("http://localhost:7777/books")
-      .pipe(
-        pluck("response"),
-        delay(500)
-      )
-      .subscribe(
-        response => {
-          setBooks([...response]);
-        },
-        err => {
-          toast.error("An error has occurred: " + err.message, {
-            autoClose: false
-          });
-          console.error(err);
-        },
-        () => {
-          toast.info("All books have been successfully retrieved.");
-        }
-      );
+    if (books && books.length > 0) {
+      return;
+    }
 
-    return () => {
-      subscription.unsubscribe();
-      toast.dismiss();
-    };
-  }, []);
+    console.log(books.length);
 
-  const handleClick = () => {
-    const latestId = Math.max(...books.map(book => book.bookID));
-    const newBook: Book = {
-      bookID: latestId + 1,
-      title: "Book " + (latestId + 1).toString(),
-      author: "Terence",
-      publicationYear: 2019
-    };
+    fetchBooks();
+  }, [books]);
 
-    setBooks([...books, newBook]);
+  const getFilteredBooks = (): Book[] => {
+    return books
+      ? books.filter(
+          book => book.title.search(new RegExp(searchKeywords, "i")) > -1
+        )
+      : [];
+  };
+
+  const handleAddBookClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    addBook();
   };
 
   const handleSearchKeywordsChanged = (
@@ -55,20 +48,14 @@ const BooksPage = () => {
     setSearchKeyWords(event.currentTarget.value);
   };
 
-  const getFilteredBooks = (): Book[] => {
-    return books.filter(
-      book => book.title.search(new RegExp(searchKeywords, "i")) > -1
-    );
-  };
-
   return (
     <>
       <h1>Books</h1>
-      {books.length < 1 ? (
+      {books.length < 1 || isLoading ? (
         <LoadingSpinner />
       ) : (
         <>
-          <button onClick={handleClick}>Add</button>
+          <button onClick={handleAddBookClick}>Add Book</button>
           <input
             value={searchKeywords}
             onChange={handleSearchKeywordsChanged}
@@ -81,4 +68,16 @@ const BooksPage = () => {
   );
 };
 
-export default BooksPage;
+const mapStateToProps = (state: any) => ({
+  ...state.bookState
+});
+
+const mapDispatchToProps = {
+  fetchBooks,
+  addBook
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(BooksPage);
